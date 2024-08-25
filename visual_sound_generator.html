@@ -1,0 +1,139 @@
+<!DOCTYPE html>  
+<html lang="pt-BR">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Gerador de Arte Visual e Sonora Dinâmica</title>  
+    <script src="https://cdn.tailwindcss.com"></script>  
+</head>  
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">  
+    <h1 class="text-3xl font-bold mb-6">Gerador de Arte Visual e Sonora Dinâmica</h1>  
+    <canvas id="canvas" width="400" height="400" class="border-4 border-white mb-6"></canvas>  
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">  
+        <div class="flex flex-col">  
+            <label for="shapeType" class="mb-2">Tipo de Forma</label>  
+            <select id="shapeType" class="bg-gray-700 p-2 rounded">  
+                <option value="circle">Círculo</option>  
+                <option value="square">Quadrado</option>  
+                <option value="triangle">Triângulo</option>  
+            </select>  
+        </div>  
+        <div class="flex flex-col">  
+            <label for="shapeSize" class="mb-2">Tamanho da Forma</label>  
+            <input type="range" id="shapeSize" min="10" max="200" value="100" class="bg-gray-700">  
+        </div>  
+        <div class="flex flex-col">  
+            <label for="colorSpeed" class="mb-2">Velocidade de Cor</label>  
+            <input type="range" id="colorSpeed" min="1" max="20" value="5" class="bg-gray-700">  
+        </div>  
+        <div class="flex flex-col">  
+            <label for="soundFreq" class="mb-2">Frequência do Som</label>  
+            <input type="range" id="soundFreq" min="100" max="1000" value="440" class="bg-gray-700">  
+        </div>  
+        <div class="flex flex-col">  
+            <label for="soundType" class="mb-2">Tipo de Som</label>  
+            <select id="soundType" class="bg-gray-700 p-2 rounded">  
+                <option value="sine">Senoidal</option>  
+                <option value="square">Quadrada</option>  
+                <option value="sawtooth">Dente de Serra</option>  
+                <option value="triangle">Triangular</option>  
+            </select>  
+        </div>  
+        <div class="flex flex-col">  
+            <label for="rotationSpeed" class="mb-2">Velocidade de Rotação</label>  
+            <input type="range" id="rotationSpeed" min="0" max="10" value="0" class="bg-gray-700">  
+        </div>  
+    </div>  
+    <button id="toggleSound" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">  
+        Iniciar Som  
+    </button>  
+
+    <script>  
+        const canvas = document.getElementById('canvas');  
+        const ctx = canvas.getContext('2d');  
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();  
+        let hue = 0;  
+        let angle = 0;  
+        let isPlaying = false;  
+        let oscillator = null;  
+
+        function draw() {  
+            const shapeType = document.getElementById('shapeType').value;  
+            const size = document.getElementById('shapeSize').value;  
+            const colorSpeed = document.getElementById('colorSpeed').value;  
+            const rotationSpeed = document.getElementById('rotationSpeed').value;  
+            
+            hue = (hue + parseInt(colorSpeed)) % 360;  
+            angle += parseFloat(rotationSpeed) * 0.01;  
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);  
+            ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;  
+            ctx.save();  
+            ctx.translate(canvas.width / 2, canvas.height / 2);  
+            ctx.rotate(angle);  
+
+            switch(shapeType) {  
+                case 'circle':  
+                    ctx.beginPath();  
+                    ctx.arc(0, 0, size / 2, 0, Math.PI * 2);  
+                    ctx.fill();  
+                    break;  
+                case 'square':  
+                    ctx.fillRect(-size / 2, -size / 2, size, size);  
+                    break;  
+                case 'triangle':  
+                    ctx.beginPath();  
+                    ctx.moveTo(0, -size / 2);  
+                    ctx.lineTo(-size / 2, size / 2);  
+                    ctx.lineTo(size / 2, size / 2);  
+                    ctx.closePath();  
+                    ctx.fill();  
+                    break;  
+            }  
+
+            ctx.restore();  
+            requestAnimationFrame(draw);  
+        }  
+
+        function updateSound() {  
+            if (!isPlaying) return;  
+            const freq = document.getElementById('soundFreq').value;  
+            const soundType = document.getElementById('soundType').value;  
+            
+            if (oscillator) {  
+                oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);  
+                oscillator.type = soundType;  
+            }  
+        }  
+
+        function toggleSound() {  
+            if (isPlaying) {  
+                oscillator.stop();  
+                oscillator = null;  
+                isPlaying = false;  
+                document.getElementById('toggleSound').textContent = 'Iniciar Som';  
+            } else {  
+                oscillator = audioContext.createOscillator();  
+                const gainNode = audioContext.createGain();  
+                
+                oscillator.connect(gainNode);  
+                gainNode.connect(audioContext.destination);  
+                
+                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);  
+                
+                oscillator.start();  
+                isPlaying = true;  
+                document.getElementById('toggleSound').textContent = 'Parar Som';  
+                updateSound();  
+            }  
+        }  
+
+        document.getElementById('toggleSound').addEventListener('click', toggleSound);  
+        ['soundFreq', 'soundType'].forEach(id => {  
+            document.getElementById(id).addEventListener('input', updateSound);  
+        });  
+
+        draw();  
+    </script>  
+</body>  
+</html>  
