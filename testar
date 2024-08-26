@@ -8,13 +8,15 @@
         body {
             margin: 0;
             overflow: hidden;
-            position: relative;
+            background-color: #000;
+            color: white;
+            font-family: Arial, sans-serif;
         }
         .bloco {
             position: absolute;
             width: 20px;
             height: 20px;
-            background-color: rgba(255, 0, 0, 0.5);
+            background-color: rgba(255, 0, 0, 0.7);
             border-radius: 4px;
         }
         #resultado {
@@ -22,7 +24,6 @@
             top: 10px;
             left: 10px;
             font-size: 20px;
-            color: white;
         }
     </style>
 </head>
@@ -31,11 +32,12 @@
     <script>
         let velocidade = 1; // Velocidade inicial do jogo
         let pontos = 0; // Pontos do usuário
-        const velocidadeAumento = 10; // Aumento da velocidade
+        const VELOCIDADE_AUMENTO = 10; // Aumento da velocidade
 
+        // Verifica se o usuário acertou ou errou
         function verificarAcerto(usuarioAcertou) {
             if (usuarioAcertou) {
-                pontos += 1; // Incrementa os pontos se o usuário acertar
+                pontos++;
                 aumentarVelocidade();
             } else {
                 gameOver();
@@ -43,53 +45,61 @@
             atualizarDisplay();
         }
 
+        // Aumenta a velocidade do jogo
         function aumentarVelocidade() {
-            velocidade += velocidadeAumento;
+            velocidade += VELOCIDADE_AUMENTO;
             console.log(`Velocidade aumentada para: ${velocidade}`);
         }
 
+        // Exibe a mensagem de Game Over e gera a cascata luminosa
         function gameOver() {
             console.log("GAME OVER");
             gerarCascataLuminosa();
         }
 
+        // Atualiza o display de pontos e velocidade
         function atualizarDisplay() {
             document.getElementById('resultado').innerText = `Pontos: ${pontos} | Velocidade: ${velocidade}`;
         }
 
+        // Gera a cascata luminosa ao final do jogo
         function gerarCascataLuminosa() {
-            const numBlocos = 20; // Número de blocos na cascata
-            for (let i = 0; i < numBlocos; i++) {
+            const NUM_BLOCOS = 20; // Número de blocos na cascata
+            for (let i = 0; i < NUM_BLOCOS; i++) {
                 criarBlocoCaindo(i);
             }
         }
 
+        // Cria um bloco que cai na tela
         function criarBlocoCaindo(index) {
             const bloco = document.createElement('div');
-            bloco.className = 'bloco'; // Classe para estilizar o bloco
+            bloco.className = 'bloco';
 
-            // Posição aleatória
-            bloco.style.left = Math.random() * window.innerWidth + 'px';
-            bloco.style.top = '0px'; // Inicia na parte superior
+            // Define posição aleatória
+            bloco.style.left = `${Math.random() * window.innerWidth}px`;
+            bloco.style.top = '0px';
 
             // Adiciona o bloco ao DOM
             document.body.appendChild(bloco);
 
-            // Animação de queda
+            // Inicia a animação de queda após um atraso
             setTimeout(() => {
-                bloco.style.transition = 'top 1s linear'; // Duração da animação
-                bloco.style.top = window.innerHeight + 'px'; // Move o bloco para o fundo
-            }, 100 * index); // Atrasa a queda dos blocos
+                bloco.style.transition = 'top 1s linear';
+                bloco.style.top = `${window.innerHeight}px`;
+            }, 100 * index);
 
             // Remove o bloco do DOM após a animação
             setTimeout(() => {
-                document.body.removeChild(bloco);
-            }, 1100); // Tempo para esperar a animação terminar antes de remover
+                bloco.remove();
+            }, 1100 + 100 * index); // Adiciona tempo de atraso no cálculo
         }
 
-        // Para simular um acerto e erro, vamos usar um evento de clique
+        // Evento de clique que simula acerto ou erro
         document.body.addEventListener('click', () => {
-            // Simula acerto ou erro aleatoriamente
             const usuarioAcertou = Math.random() < 0.7; // 70% de chance de acertar
             verificarAcerto(usuarioAcertou);
         });
+
+    </script>
+</body>
+</html>
