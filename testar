@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Velocidade</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .bloco {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 0, 0, 0.5);
+            border-radius: 4px;
+        }
+        #resultado {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="resultado">Pontos: 0 | Velocidade: 1</div>
+    <script>
+        let velocidade = 1; // Velocidade inicial do jogo
+        let pontos = 0; // Pontos do usuário
+        const velocidadeAumento = 10; // Aumento da velocidade
+
+        function verificarAcerto(usuarioAcertou) {
+            if (usuarioAcertou) {
+                pontos += 1; // Incrementa os pontos se o usuário acertar
+                aumentarVelocidade();
+            } else {
+                gameOver();
+            }
+            atualizarDisplay();
+        }
+
+        function aumentarVelocidade() {
+            velocidade += velocidadeAumento;
+            console.log(`Velocidade aumentada para: ${velocidade}`);
+        }
+
+        function gameOver() {
+            console.log("GAME OVER");
+            gerarCascataLuminosa();
+        }
+
+        function atualizarDisplay() {
+            document.getElementById('resultado').innerText = `Pontos: ${pontos} | Velocidade: ${velocidade}`;
+        }
+
+        function gerarCascataLuminosa() {
+            const numBlocos = 20; // Número de blocos na cascata
+            for (let i = 0; i < numBlocos; i++) {
+                criarBlocoCaindo(i);
+            }
+        }
+
+        function criarBlocoCaindo(index) {
+            const bloco = document.createElement('div');
+            bloco.className = 'bloco'; // Classe para estilizar o bloco
+
+            // Posição aleatória
+            bloco.style.left = Math.random() * window.innerWidth + 'px';
+            bloco.style.top = '0px'; // Inicia na parte superior
+
+            // Adiciona o bloco ao DOM
+            document.body.appendChild(bloco);
+
+            // Animação de queda
+            setTimeout(() => {
+                bloco.style.transition = 'top 1s linear'; // Duração da animação
+                bloco.style.top = window.innerHeight + 'px'; // Move o bloco para o fundo
+            }, 100 * index); // Atrasa a queda dos blocos
+
+            // Remove o bloco do DOM após a animação
+            setTimeout(() => {
+                document.body.removeChild(bloco);
+            }, 1100); // Tempo para esperar a animação terminar antes de remover
+        }
+
+        // Para simular um acerto e erro, vamos usar um evento de clique
+        document.body.addEventListener('click', () => {
+            // Simula acerto ou erro aleatoriamente
+            const usuarioAcertou = Math.random() < 0.7; // 70% de chance de acertar
+            verificarAcerto(usuarioAcertou);
+        });
